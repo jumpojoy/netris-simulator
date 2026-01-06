@@ -1,0 +1,129 @@
+---
+# Ansible Playbook for Virtual Cumulus Switch Lab
+# Creates a leaf-spine topology using libvirt/KVM with UDP tunnels for links
+
+- name: Setup Virtual Switch Lab
+  hosts: localhost
+  become: yes
+  gather_facts: yes
+
+  vars:
+    all_switches: "{{ topology.spines + topology.leafs }}"
+    all_servers: "{{ topology.nodes + topology.softgates }}"
+
+  tasks:
+    # ===========================================
+    # Prerequisites
+    # ===========================================
+    - name: Install required packages
+      ansible.builtin.apt:
+        name:
+          - python3-pip
+          - ovmf
+        state: present
+        update_cache: false
+    
+    - name: Install virtualbmc
+      ansible.builtin.pip:
+        name: virtualbmc
+        state: present
+        break_system_packages: true
+
+    - name: Create artifacts directory
+      file:
+        path: "{{ k8s_artifacts_dir }}"
+        state: directory
+        recurse: true
+    
+    - name: Ensure vbmcd service file exists
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/vbmcd.service
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Virtual BMC daemon
+          After=network.target libvirtd.service
+    
+          [Service]
+          Type=simple
+          ExecStart=/usr/local/bin/vbmcd --foreground
+          Restart=always
+          RestartSec=5
+    
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Enable and start vbmcd service
+      ansible.builtin.systemd:
+        name: vbmcd
+        daemon_reload: true
+        enabled: true
+        state: started
+    - name: Wait for vbmcd to be ready
+      ansible.builtin.pause:
+        seconds: 3
+
+    # ===========================================
+    # Build link information for each VM
+    # ===========================================
+    - name: Create VMs with virt-install
+      include_tasks: tasks/create-vm.yml
+      vars:
+        vm_name: "{{ item.0.name }}"
+        vm_index: "{{ item.1 }}"
+        vm_base_offset: "{{ vm_index | int * 2 }}"
+        vbmc_port: "{{ vbmc_base_port + vm_index | int }}"
+        ssh_port: "{{ mgmt_ssh_base_port + vm_index | int }}"
+        vm_mac_0: "{{vm_base_mac }}:{{ '%02x' | format(base_offset | int // 256) }}:{{ '%02x' | format(base_offset | int % 256) }}"
+        vm_mac_1: "{{vm_base_mac }}:{{ '%02x' | format((base_offset | int + 1) // 256) }}:{{ '%02x' | format((base_offset | int + 1) % 256) }}"
+      loop: "{{ all_servers | zip(range(all_servers | length)) | list }}"
+      loop_control:
+        label: "{{ item.0.name }}"
+
+    - name: Render Netris templates
+      vars:
+        server_name: "{{ item.0.name }}"
+        links: "{{ topology.links }}"
+        server_index: "{{ item.1 }}"
+        server_digit: "{{ server_index | int + 1 }}"
+        loopback_ip: "{{ loopback_base_server }}.{{ server_digit }}"
+        mgmt_ip: "{{ management_base_server }}.{{ server_digit }}"
+      ansible.builtin.template:
+        src: "k8s/netris_server.j2"
+        dest: "{{ k8s_artifacts_dir }}/{{ server_name }}.yaml"
+      loop: "{{ all_servers | zip(range(all_servers | length)) | list }}"
+      loop_control:
+        loop_var: item
+
+
+    # ===========================================
+    # Display connection info
+    # ===========================================
+    - name: Display summary
+      debug:
+        msg: "{{ msg.split('\n') }}"
+      vars:
+        msg: |
+          Virtual Baremetal VMs created!
+    
+          | VM  | MAC Address       | VBMC Port | VBMC Address     |
+          |-----|-------------------|-----------|------------------|
+          {% for item in all_servers %}
+          {% set vm_index = loop.index0 %}
+          {% set base_offset = vm_index * 2 %}
+
+          {% set vm_mac_0 = vm_base_mac ~ ':' ~ ('%02x' | format(base_offset // 256)) ~ ':' ~ ('%02x' | format(base_offset % 256)) %}
+          {% set vm_mac_1 = vm_base_mac ~ ':' ~ ('%02x' | format((base_offset +1)// 256)) ~ ':' ~ ('%02x' | format((base_offset+1) % 256)) %}
+          | {{ item.name }} | {{ vm_mac_0 }} {{ vm_mac_1 }} | {{ vbmc_base_port + vm_index }}      | 172.16.81.254    |
+          {% endfor %}
+    
+          Test IPMI with:
+            ipmitool -I lanplus -U admin -P password -H 127.0.0.1 -p 6231 power status
+    
+          Start a VM:
+            ipmitool -I lanplus -U admin -P password -H 172.16.81.254 -p 6231 power on
+    
+          Set PXE boot:
+            ipmitool -I lanplus -U admin -P password -H 172.16.81.254 -p 6231 chassis bootdev pxe
