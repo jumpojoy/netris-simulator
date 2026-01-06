@@ -19,9 +19,14 @@ ansible-playbook -i inventory.yml configure-switches.yml
 # 4. Destroy the lab
 ansible-playbook -i inventory.yml destroy-vms.yml
 ansible-playbook -i inventory.yml destroy-switches.yml
+
+# 5. Create netris resources
+kubectl apply -f artifacts/k8s/
 ```
 
 ## Customizing the Topology
+
+![Network topology diagram](images/netris-topology.png)
 
 Edit `group_vars/all.yml` to modify:
 
