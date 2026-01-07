@@ -58,6 +58,9 @@
       --qemu-commandline='-netdev socket,udp=127.0.0.1:{{ link.udp_remote }},localaddr=127.0.0.1:{{ link.udp_local }},id={{ link.port }}'
       --qemu-commandline='-device virtio-net-pci,netdev={{ link.port }},id=net{{ link.port }}'
       {% endfor %}
+      {% if "leaf" in switch_name %}
+      --network bridge={{ br_pxe_name }},model=virtio
+      {% endif %}
 
 - name: "{{ switch_name }} - Create VM with virt-install"
   shell: "{{ virt_install_cmd }}"

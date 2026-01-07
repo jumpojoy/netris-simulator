@@ -106,12 +106,22 @@ vm_ram: 6144
 vm_disk_size: 60
 disk_path: /var/lib/libvirt/images
 
-# Get at http://172.19.115.211:81/settings/general
 netris_token: 68s8FqEcIckIVI77ZZOtZJa88ARKsADiP4oEccIo
 netris_controller: 10.172.1.100
+
 loopback_base: "192.169"
 management_base: "192.168"
 loopback_base_switch: "192.169.0"
 management_base_switch: "192.168.0"
 loopback_base_server: "192.169.1"
 management_base_server: "192.168.1"
+
+pxe_base: 172.16.81
+
+br_pxe_name: br-pxe
+br_pxe_ip: 172.16.81.254
+br_pxe_netmask: 24
+
+br_mgmt_name: br-mgmt
+br_mgmt_ip: 172.16.81.254
+br_mgmt_netmask: 24

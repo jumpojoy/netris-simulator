@@ -1,0 +1,64 @@
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - bridge-utils
+      - python3-netaddr
+    state: present
+    update_cache: false
+
+- name: Create PXE bridge configuration with Netplan
+  notify:
+    - Apply netplan
+  ansible.builtin.copy:
+    dest: /etc/netplan/10-br-pxe.yaml
+    owner: root
+    group: root
+    mode: "0600"  # Netplan files are often 0600 for security
+    content: |
+      # Management bridge for libvirt VMs and Tinkerbell
+      # This bridge provides the 172.16.81.0/24 network for bare metal provisioning
+
+      network:
+        version: 2
+        renderer: networkd  # Use networkd (common on servers); change to NetworkManager if needed
+        bridges:
+          {{ br_pxe_name }}:
+            addresses:
+              - {{ br_pxe_ip }}/{{ br_pxe_netmask }}
+            parameters:
+              stp: false
+              forward-delay: 0
+              hello-time: 2
+              max-age: 20
+            # No interfaces: [] needed — omitting it creates an empty bridge (ports: none)
+- name: Create MGMT bridge configuration with Netplan
+  notify:
+    - Apply netplan
+  ansible.builtin.copy:
+    dest: /etc/netplan/10-br-mgmt.yaml
+    owner: root
+    group: root
+    mode: "0600"  # Netplan files are often 0600 for security
+    content: |
+      # Management bridge for libvirt VMs and Tinkerbell
+      # This bridge provides the 172.16.81.0/24 network for bare metal provisioning
+
+      network:
+        version: 2
+        renderer: networkd  # Use networkd (common on servers); change to NetworkManager if needed
+        bridges:
+          {{ br_mgmt_name }}:
+            #            addresses:
+            #              - {{ br_mgmt_ip }}/{{ br_mgmt_netmask }}
+            parameters:
+              stp: false
+              forward-delay: 0
+              hello-time: 2
+              max-age: 20
+            # No interfaces: [] needed — omitting it creates an empty bridge (ports: none)
+
+- name: Set bridge interface up
+  ansible.builtin.command: ip link set {{ item }} up
+  with_items:
+    - "{{ br_pxe_name }}"
+    - "{{ br_mgmt_name }}"

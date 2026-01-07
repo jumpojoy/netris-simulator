@@ -1,0 +1,97 @@
+apiVersion: ufo.mirantis.com/v1alpha1
+kind: NetworkBundle
+metadata:
+  name: cats
+  namespace: kcm-system
+spec:
+  allocations:
+    subnetAllocations:
+      - name: cats-mgmt-subnet
+        prefixLength: 24
+        subnetpool: default
+        subnet: cats-mgmt-subnet
+        network: cats-mgmt-net
+        tenant: cats
+        vpc: cats
+        sites:
+          - default
+      - name: cats-data-subnet
+        prefixLength: 24
+        subnetpool: default
+        subnet: cats-data-subnet
+        network: cats-data-net
+        tenant: cats
+        vpc: cats
+        sites:
+          - default
+    networks:
+      - name: cats-mgmt-net
+        type: evpn
+        vpc: cats
+        tenant: cats
+        sites:
+          - default
+        evpn:
+          type: l3
+        vlan:
+          id: "auto"
+      - name: cats-data-net
+        type: evpn
+        vpc: cats
+        tenant: cats
+        sites:
+          - default
+        evpn:
+          type: l3
+        vlan:
+          id: "auto"
+  networkData:
+    links:
+      ethernets:
+        - type: "phy"
+          id: "enp1s0"
+          mtu: 1500
+          macAddress:
+            fromAnnotation:
+              object: machine
+              annotation: net_interface_mgmt_0_mac
+        - type: "phy"
+          id: "enp2s0"
+          mtu: 1500
+          macAddress:
+            fromAnnotation:
+              object: machine
+              annotation: net_interface_mgmt_1_mac
+      bonds:
+        - id: "bond0"
+          mtu: 1500
+          bondMode: "802.3ad"
+          bondXmitHashPolicy: "layer2"
+          bondLinks:
+            - enp1s0
+            - enp2s0
+          macAddress:
+            fromAnnotation:
+              object: machine
+              annotation: net_interface_mgmt_0_mac
+      vlans:
+       - id: "vlan1"
+         mtu: 1500
+         vlanID: 1
+         vlanLink: bond0
+         macAddress:
+           fromAnnotation:
+             object: machine
+             annotation: net_interface_mgmt_0_mac
+    networks:
+      ipv4:
+      - id: "Baremetal"
+        link: "vlan1"
+        ipFromNetworkSpec:
+          name: mgmt-net
+        routes:
+        - network: "0.0.0.0"
+          netmask: 0
+          gateway:
+            gatewayFromNetworkSpec:
+              name: foo

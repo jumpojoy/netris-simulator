@@ -1,1 +1,1 @@
-artifacts
+artifacts/k8s/*.yaml

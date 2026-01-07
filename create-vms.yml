@@ -10,6 +10,11 @@
   vars:
     all_switches: "{{ topology.spines + topology.leafs }}"
     all_servers: "{{ topology.nodes + topology.softgates }}"
+  handlers:
+    - name: Apply netplan
+      command: sudo netplan apply
+      async: 45
+      poll: 0
 
   tasks:
     # ===========================================
@@ -65,6 +70,11 @@
       ansible.builtin.pause:
         seconds: 3
 
+    # Create PXE network
+    # ===========================================
+    - name: Create PXE network
+      include_tasks: tasks/pxe-net.yml
+
     # ===========================================
     # Build link information for each VM
     # ===========================================
@@ -97,6 +107,14 @@
       loop_control:
         loop_var: item
 
+    - name: Render Netris mgmt host templates
+      vars:
+        server_name: ctl
+        loopback_ip: "{{ loopback_base_server }}.253"
+        mgmt_ip: "{{ management_base_server }}.253"
+      ansible.builtin.template:
+        src: "k8s/netris_ctl.j2"
+        dest: "{{ k8s_artifacts_dir }}/{{ server_name }}.yaml"
 
     # ===========================================
     # Display connection info
