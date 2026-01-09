@@ -104,6 +104,7 @@ bridge_name: br-mgmt
 vm_vcpus: 6
 vm_ram: 6144
 vm_disk_size: 60
+vm_port_count: 4
 disk_path: /var/lib/libvirt/images
 
 netris_token: 68s8FqEcIckIVI77ZZOtZJa88ARKsADiP4oEccIo

@@ -3,7 +3,9 @@ apiVersion: ufo.mirantis.com/v1alpha1
 kind: Network
 metadata:
   name: pxe
-  namespace: default
+  namespace: kcm-system
+  annotations:
+    ufo.mirantis.com/pxe: default
 spec:
   vpc: Default
   type: evpn
@@ -12,7 +14,7 @@ spec:
   evpn:
     type: l2
   tags:
-    - ufo.mirantis.com
+    - ufo.mirantis.com/pxe=default
   gateways: []
   dhcp:
     enabled: false
@@ -24,7 +26,7 @@ apiVersion: ufo.mirantis.com/v1alpha1
 kind: Subnet
 metadata:
   name: pxe
-  namespace: default
+  namespace: kcm-system
 spec:
   vpc: Default
   cidr: 172.16.81.0/24

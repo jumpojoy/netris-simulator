@@ -73,21 +73,12 @@ spec:
             fromAnnotation:
               object: machine
               annotation: net_interface_mgmt_0_mac
-      vlans:
-       - id: "vlan1"
-         mtu: 1500
-         vlanID: 1
-         vlanLink: bond0
-         macAddress:
-           fromAnnotation:
-             object: machine
-             annotation: net_interface_mgmt_0_mac
     networks:
       ipv4:
       - id: "Baremetal"
-        link: "vlan1"
-        ipFromNetworkSpec:
-          name: mgmt-net
+        link: "bond0"
+        ipFromSubnet:
+          name: dogs-mgmt-subnet
         routes:
         - network: "0.0.0.0"
           netmask: 0

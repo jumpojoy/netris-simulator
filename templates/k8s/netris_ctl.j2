@@ -3,6 +3,7 @@ apiVersion: k8s.netris.ai/v1alpha1
 kind: Server
 metadata:
   name: {{ server_name }}
+  namespace: kcm-system
 spec:
   tenant: Admin
   description: {{ server_name }}
@@ -26,6 +27,7 @@ apiVersion: ufo.mirantis.com/v1alpha1
 kind: ServerInterfaceAttachment
 metadata:
   name: ctl-interfaces
+  namespace: kcm-system
 spec:
   server: ctl
   attachments:
