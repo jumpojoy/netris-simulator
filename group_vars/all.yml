@@ -120,7 +120,7 @@ sg_image_url: "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudi
 sg_image: "/var/lib/libvirt/images/noble-server-cloudimg-amd64.img"
 sg_disk_size: 60
 
-netris_token: orWOcjafc01doQgvf5T3aLJ6y9esjLTPIYUVSyq5
+netris_token: <token from webapi>
 netris_controller: 10.172.1.100
 
 loopback_base: "192.169"
