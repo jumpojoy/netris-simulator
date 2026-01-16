@@ -1,0 +1,7 @@
+controller:
+  host: http://172.19.115.211:81
+  login: netris
+  password: password
+image:
+  repository: jumpojoy/netris-operator
+  tag: vs84

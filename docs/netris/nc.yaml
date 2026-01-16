@@ -1,0 +1,34 @@
+ingress:
+  ingressClassName: nginx
+  hosts:
+    - netris.k0rdent-bm-lab.miralabs.dev
+
+netris:
+  webLogin: netris
+  webPassword: password
+      #web-service-backend:
+      #  image:
+      #    tag: 4.5.4-017
+web-service-frontend:
+  service:
+    type: LoadBalancer 
+      #  image:
+      #    tag: 4.5.4-017
+      #grpc:
+      #  image:
+      #    tag: 4.5.4-017
+      #      #telescope:
+      #      #  image:
+      #      #    tag: 4.5.4-017
+      #      #telescope-notifier:
+      #      #  image:
+      #      #    tag: 4.5.4-017
+      #web-session-generator:
+      #  image:
+      #    tag: 4.5.4-017
+      #      #migration:
+      #      #  image:
+      #      #    tag: 4.5.4-017
+      #
+
+
