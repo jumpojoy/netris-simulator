@@ -101,7 +101,7 @@ topology:
 # Cumulus default credentials
 cumulus_user: cumulus
 cumulus_default_password: cumulus
-cumulus_new_password: "NewNet0ps!"
+cumulus_new_password: password
 
 vbmc_user: admin
 vbmc_password: password
