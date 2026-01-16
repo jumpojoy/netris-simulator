@@ -9,7 +9,8 @@
 
   vars:
     all_switches: "{{ topology.spines + topology.leafs }}"
-    all_servers: "{{ topology.nodes + topology.softgates }}"
+    all_servers: "{{ topology.nodes }}"
+    all_softgates: "{{ topology.softgates }}"
   handlers:
     - name: Apply netplan
       command: sudo netplan apply
@@ -28,48 +29,12 @@
         state: present
         update_cache: false
     
-    - name: Install virtualbmc
-      ansible.builtin.pip:
-        name: virtualbmc
-        state: present
-        break_system_packages: true
-
     - name: Create artifacts directory
       file:
         path: "{{ k8s_artifacts_dir }}"
         state: directory
         recurse: true
     
-    - name: Ensure vbmcd service file exists
-      ansible.builtin.copy:
-        dest: /etc/systemd/system/vbmcd.service
-        owner: root
-        group: root
-        mode: "0644"
-        content: |
-          [Unit]
-          Description=Virtual BMC daemon
-          After=network.target libvirtd.service
-    
-          [Service]
-          Type=simple
-          ExecStart=/usr/local/bin/vbmcd --foreground
-          Restart=always
-          RestartSec=5
-    
-          [Install]
-          WantedBy=multi-user.target
-
-    - name: Enable and start vbmcd service
-      ansible.builtin.systemd:
-        name: vbmcd
-        daemon_reload: true
-        enabled: true
-        state: started
-    - name: Wait for vbmcd to be ready
-      ansible.builtin.pause:
-        seconds: 3
-
     # Create PXE network
     # ===========================================
     - name: Create PXE network
@@ -84,7 +49,6 @@
         vm_name: "{{ item.0.name }}"
         vm_index: "{{ item.1 }}"
         vm_base_offset: "{{ vm_index | int * vm_port_count }}"
-        vbmc_port: "{{ vbmc_base_port + vm_index | int }}"
         ssh_port: "{{ mgmt_ssh_base_port + vm_index | int }}"
         vm_mac_0: "{{vm_base_mac }}:{{ '%02x' | format(base_offset | int // 256) }}:{{ '%02x' | format(base_offset | int % 256) }}"
         vm_mac_1: "{{vm_base_mac }}:{{ '%02x' | format((base_offset | int + 1) // 256) }}:{{ '%02x' | format((base_offset | int + 1) % 256) }}"
@@ -92,7 +56,37 @@
       loop_control:
         label: "{{ item.0.name }}"
 
-    - name: Render Netris templates
+    # ================
+    # Create SoftGates
+    # ================
+    - name: Create SoftGates with virt-install
+      include_tasks: tasks/create-sg.yml
+      vars:
+        vm_name: "{{ item.0.name }}"
+        vm_index: "{{ item.1 }}"
+        vm_base_offset: "{{ vm_index | int * sg_port_count }}"
+        ssh_port: "{{ mgmt_ssh_base_port + vm_index | int }}"
+        mgmt_ip: "{{ management_base_sg }}.{{  vm_index | int + 1 }}"
+      loop: "{{ all_softgates | zip(range(all_softgates | length)) | list }}"
+      loop_control:
+        label: "{{ item.0.name }}"
+
+    - name: Render Netris SG templates
+      vars:
+        sg_name: "{{ item.0.name }}"
+        links: "{{ topology.links }}"
+        sg_index: "{{ item.1 }}"
+        sg_digit: "{{ sg_index | int + 1 }}"
+        loopback_ip: "{{ loopback_base_sg }}.{{ sg_digit }}"
+        mgmt_ip: "{{ management_base_sg }}.{{  sg_index | int + 1 }}"
+      ansible.builtin.template:
+        src: "k8s/netris_sg.j2"
+        dest: "{{ k8s_artifacts_dir }}/{{ sg_name }}.yaml"
+      loop: "{{ all_softgates | zip(range(all_softgates | length)) | list }}"
+      loop_control:
+        loop_var: item
+
+    - name: Render Netris Server templates
       vars:
         server_name: "{{ item.0.name }}"
         links: "{{ topology.links }}"
@@ -134,7 +128,7 @@
 
           {% set vm_mac_0 = vm_base_mac ~ ':' ~ ('%02x' | format(base_offset // 256)) ~ ':' ~ ('%02x' | format(base_offset % 256)) %}
           {% set vm_mac_1 = vm_base_mac ~ ':' ~ ('%02x' | format((base_offset +1)// 256)) ~ ':' ~ ('%02x' | format((base_offset+1) % 256)) %}
-          | {{ item.name }} | {{ vm_mac_0 }} {{ vm_mac_1 }} | {{ vbmc_base_port + vm_index }}      | 172.16.81.254    |
+          | {{ item.name }} | {{ vm_mac_0 }} {{ vm_mac_1 }} |  | 172.16.81.254    |
           {% endfor %}
     
           Test IPMI with:

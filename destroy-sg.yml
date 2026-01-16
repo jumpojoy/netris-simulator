@@ -2,13 +2,13 @@
 # Ansible Playbook for Virtual Cumulus Switch Lab
 # Creates a leaf-spine topology using libvirt/KVM with UDP tunnels for links
 
-- name: Destroy VMs
+- name: Destroy Softgates
   hosts: localhost
   become: yes
   gather_facts: yes
 
   vars:
-    all_servers: "{{ topology.nodes }}"
+    all_servers: "{{ topology.softgates }}"
   tasks:
     # ===========================================
     # Build link information for each VM

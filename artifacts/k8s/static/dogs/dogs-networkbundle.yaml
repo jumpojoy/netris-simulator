@@ -2,6 +2,7 @@ apiVersion: ufo.mirantis.com/v1alpha1
 kind: NetworkBundle
 metadata:
   name: dogs
+  namespace: kcm-system
 spec:
   allocations:
     subnetAllocations:
@@ -14,6 +15,7 @@ spec:
         vpc: dogs
         sites:
           - default
+        gateway: true
       - name: dogs-data-subnet
         prefixLength: 24
         subnetpool: default
@@ -34,6 +36,8 @@ spec:
           type: l3
         vlan:
           id: "auto"
+        dnsServers:
+        - "4.2.2.1"
       - name: dogs-data-net
         type: evpn
         vpc: dogs
@@ -44,6 +48,8 @@ spec:
           type: l3
         vlan:
           id: "auto"
+        dnsServers:
+        - "4.2.2.1"
   networkData:
     links:
       ethernets:
@@ -61,27 +67,27 @@ spec:
             fromAnnotation:
               object: machine
               annotation: net_interface_mgmt_1_mac
-      bonds:
-        - id: "bond0"
-          mtu: 1500
-          bondMode: "802.3ad"
-          bondXmitHashPolicy: "layer2"
-          bondLinks:
-            - enp1s0
-            - enp2s0
-          macAddress:
-            fromAnnotation:
-              object: machine
-              annotation: net_interface_mgmt_0_mac
+                #      bonds:
+                #        - id: "bond0"
+                #          mtu: 1500
+                #          bondMode: "802.3ad"
+                #          bondXmitHashPolicy: "layer2"
+                #          bondLinks:
+                #            - enp1s0
+                #            - enp2s0
+                #          macAddress:
+                #            fromAnnotation:
+                #              object: machine
+                #              annotation: net_interface_mgmt_0_mac
     networks:
       ipv4:
       - id: "Baremetal"
-        link: "bond0"
+        link: "enp1s0"
         ipFromSubnet:
           name: dogs-mgmt-subnet
         routes:
         - network: "0.0.0.0"
           netmask: 0
           gateway:
-            gatewayFromNetworkSpec:
-              name: foo
+            gatewayFromSubnet:
+              name: dogs-mgmt-subnet

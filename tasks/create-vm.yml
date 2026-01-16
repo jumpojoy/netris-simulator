@@ -53,35 +53,6 @@
     {% endfor %}
   when: vm_exists.rc != 0
 
-- name: Check existing VBMC entries
-  ansible.builtin.command: vbmc list
-  register: vbmc_list
-  changed_when: false
-
-- name: Add VMs to VirtualBMC
-  ansible.builtin.command: >
-    vbmc add {{ vm_name }}
-    --port {{ vbmc_port }}
-    --username {{ vbmc_user }}
-    --password {{ vbmc_password }}
-    --address 0.0.0.0
-  when: vm_name not in vbmc_list.stdout
-
-- name: Start VBMC for each VM
-  ansible.builtin.command: vbmc start {{ vm_name }}
-  register: vbmc_start
-  changed_when: "'started' in vbmc_start.stdout or vbmc_start.rc == 0"
-  failed_when: false
-
-- name: Get VBMC status
-  ansible.builtin.command: vbmc list
-  register: vbmc_status
-  changed_when: false
-
-- name: Display VBMC status
-  ansible.builtin.debug:
-    var: vbmc_status.stdout_lines
-
 - name: Get VM list
   ansible.builtin.command: virsh list --all
   register: vm_list
@@ -100,7 +71,6 @@
   vars:
     server_name: "{{ vm_name }}"
     pxe_mac: "{{vm_base_mac }}:{{ '%02x' | format(vm_base_offset | int // 256) }}:{{ '%02x' | format(vm_base_offset | int % 256) }}"
-      #    redfish_password: "{{ vbmc_password }}"
     redfish_password: "I80gRaWHD2aHEyZ4"
     redfish_username: "{{ vbmc_user }}"
     server_uuid: '{{ vm_uuid.stdout | regex_replace("\s","") }}'
