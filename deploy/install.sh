@@ -2,10 +2,11 @@ WORKDIR=/opt/ufo_lab/
 
 NETRIS_SIMULATOR_DIR=${WORKDIR}/netris-simulator
 export DEBIAN_FRONTEND=noninteractive
+export PIP_BREAK_SYSTEM_PACKAGES=1
 
 apt update && apt install -y python3-pip
 
-pip3 install ansible --break-system-packages
+pip3 install ansible
 
 mkdir -p ${WORKDIR}
 
