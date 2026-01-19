@@ -16,8 +16,8 @@ fi
 CUMULUS_NEW_PASSWORD=$(date +%s | sha256sum | base64 | head -c 15)
 NETRIS_ADMIN_PASSWORD=$(date +%s | sha256sum | base64 | head -c 15)
 
-sed -ie "s/<CUMULUS_NEW_PASSWORD>/${CUMULUS_NEW_PASSWORD}/g" ${NETRIS_SIMULATOR_DIR}/inventory.yml
-sed -ie "s/<NETRIS_ADMIN_PASSWORD>/${NETRIS_ADMIN_PASSWORD}/g" ${NETRIS_SIMULATOR_DIR}/inventory.yml
+sed -i "s/<CUMULUS_NEW_PASSWORD>/${CUMULUS_NEW_PASSWORD}/g" ${NETRIS_SIMULATOR_DIR}/inventory.yml
+sed -i "s/<NETRIS_ADMIN_PASSWORD>/${NETRIS_ADMIN_PASSWORD}/g" ${NETRIS_SIMULATOR_DIR}/inventory.yml
 
 
 ansible-playbook -i ${NETRIS_SIMULATOR_DIR}/inventory.yml ${NETRIS_SIMULATOR_DIR}/k0s.yml
