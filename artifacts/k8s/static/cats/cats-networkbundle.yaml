@@ -67,6 +67,20 @@ spec:
             fromAnnotation:
               object: machine
               annotation: net_interface_mgmt_1_mac
+        - type: "phy"
+          id: "enp3s0"
+          mtu: 1500
+          macAddress:
+            fromAnnotation:
+              object: machine
+              annotation: net_interface_north-south_0_mac
+        - type: "phy"
+          id: "enp4s0"
+          mtu: 1500
+          macAddress:
+            fromAnnotation:
+              object: machine
+              annotation: net_interface_north-south_1_mac
                 #      bonds:
                 #        - id: "bond0"
                 #          mtu: 1500
@@ -91,3 +105,7 @@ spec:
           gateway:
             gatewayFromSubnet:
               name: cats-mgmt-subnet
+      - id: "data"
+        link: "enp3s0"
+        ipFromSubnet:
+          name: cats-data-subnet
