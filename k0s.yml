@@ -1,0 +1,311 @@
+# Copyright 2025 s3rj1k
+# SPDX-License-Identifier: MIT
+
+# Examples:
+# Install as controller:
+#   ansible-playbook k0s.yaml
+#
+# Get worker token from existing k0s control plane:
+#   k0s token create --role=worker
+#
+# Install as worker:
+#   ansible-playbook k0s.yaml -e WORKER_DATA="TOKEN_DATA_HERE"
+#
+
+---
+- name: Kubernetes (k0s) on Debian/Ubuntu AMD64
+  hosts: localhost
+  connection: local
+  become: true
+  gather_facts: true
+  ignore_errors: false
+  vars:
+    K0S_MAJOR_MINOR_VERSION: "1.33"
+    K0S_EXTRA_FLAGS: "--enable-dynamic-config --disable-components=konnectivity-server"
+    WORKER_DATA: ""
+
+  tasks:
+    - name: Configure kernel modules
+      block:
+        - name: Ensure required kernel modules are loaded
+          shell: modprobe {{ item }}
+          loop:
+            - overlay
+            - br_netfilter
+          changed_when: false
+
+        - name: Persist required kernel modules
+          copy:
+            dest: /etc/modules-load.d/99-local.conf
+            content: |
+              overlay
+              br_netfilter
+            mode: "0644"
+
+        - name: Configure kernel parameters
+          copy:
+            dest: /etc/sysctl.d/99-local.conf
+            content: |
+              fs.inotify.max_user_instances = 8192
+              fs.inotify.max_user_watches = 524288
+              kernel.panic = 10
+              kernel.panic_on_oops = 1
+              net.bridge.bridge-nf-call-ip6tables = 1
+              net.bridge.bridge-nf-call-iptables = 1
+              net.ipv4.conf.all.rp_filter = 1
+              net.ipv4.ip_forward = 1
+              net.ipv4.tcp_congestion_control = bbr
+              net.ipv6.conf.all.disable_ipv6 = 0
+              net.ipv6.conf.all.forwarding = 1
+              vm.overcommit_memory = 1
+            mode: "0644"
+
+        - name: Apply kernel parameters
+          command: sysctl --system
+          changed_when: false
+
+    - name: Install etcd network tuning script and udev rule
+      block:
+        - name: Create directory for scripts
+          file:
+            path: /usr/local/sbin
+            state: directory
+            mode: "0755"
+            owner: root
+            group: root
+
+        - name: Install etcd network tuning script
+          copy:
+            dest: /usr/local/sbin/etcd-network-tuning.sh
+            content: |
+              #!/bin/bash
+
+              export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+              set -o errexit  # exits immediately on any unexpected error (does not bypass traps)
+              set -o nounset  # will error if variables are used without first being defined
+              set -o pipefail # any non-zero exit code in a piped command causes the pipeline to fail with that code
+
+              trap on_exit ERR
+              on_exit() {
+                  echo "Error setting etcd network tuning parameters for interface: ${DEV}" | systemd-cat -p emerg -t etcd-tuning
+              }
+
+              if [ "$#" -ne 1 ]; then
+                  echo "Error: Usage: $0 <dev>" | systemd-cat -p emerg -t etcd-tuning
+                  exit 1
+              fi
+
+              DEV=$1
+
+              echo "Setting etcd network tuning parameters for interface: ${DEV}" | systemd-cat -p info -t etcd-tuning
+              tc qdisc del dev ${DEV} root 2>/dev/null || true
+              tc qdisc add dev ${DEV} root handle 1: prio bands 3
+              tc filter add dev ${DEV} parent 1: protocol ip prio 1 u32 match ip sport 2380 0xffff flowid 1:1
+              tc filter add dev ${DEV} parent 1: protocol ip prio 1 u32 match ip dport 2380 0xffff flowid 1:1
+              tc filter add dev ${DEV} parent 1: protocol ip prio 2 u32 match ip sport 2379 0xffff flowid 1:1
+              tc filter add dev ${DEV} parent 1: protocol ip prio 2 u32 match ip dport 2379 0xffff flowid 1:1
+
+              exit 0
+            mode: "0755"
+            owner: root
+            group: root
+          register: script_install
+
+        - name: Install udev rule for etcd network tuning
+          copy:
+            dest: /etc/udev/rules.d/90-etcd-network-tuning.rules
+            content: |
+              ACTION=="add", SUBSYSTEM=="net", SUBSYSTEMS=="pci|xen|vmbus" RUN+="/usr/local/sbin/etcd-network-tuning.sh $name"
+            mode: "0644"
+            owner: root
+            group: root
+          register: udev_rule_install
+
+        - name: Reload udev rules if changed
+          command: udevadm control --reload-rules
+          when: udev_rule_install.changed
+
+        - name: Trigger udev events for network interfaces if script or rules changed
+          shell: find /sys/class/net -mindepth 1 -maxdepth 1 -type l -name "[a-z]*" -not -name "lo" -printf "%f\n" | xargs -I{} udevadm trigger --action=add --subsystem-match=net --sysname-match={}
+          when: script_install.changed or udev_rule_install.changed
+      when: WORKER_DATA is not defined or WORKER_DATA | trim | length == 0
+
+    - name: Check if k0s config already exists
+      stat:
+        path: /etc/k0s/k0s.yaml
+      register: k0s_config_stat
+
+    - name: Install k0s
+      when: not k0s_config_stat.stat.exists
+      block:
+        - name: Get latest k0s {{ K0S_MAJOR_MINOR_VERSION }} version
+          shell: |
+            curl -s "https://api.github.com/repos/k0sproject/k0s/releases" | \
+            jq -r '.[] | select(.tag_name | test("^v{{ K0S_MAJOR_MINOR_VERSION | replace(".", "\\.") }}\\.[0-9]+\\+k0s\\.[0-9]+$")) | .tag_name' | \
+            head -1
+          register: k0s_version_result
+          changed_when: false
+
+        - name: Set k0s version
+          set_fact:
+            k0s_version: "{{ k0s_version_result.stdout }}"
+          when: k0s_version_result.stdout | length > 0
+
+        - name: Download k0s binary ({{ k0s_version | default('version not found') }})
+          get_url:
+            url: "https://github.com/k0sproject/k0s/releases/download/{{ k0s_version }}/k0s-{{ k0s_version }}-amd64"
+            dest: /usr/local/bin/k0s
+            mode: "0755"
+          when: k0s_version is defined
+
+        - name: Create k0s config directory
+          file:
+            path: /etc/k0s/
+            state: directory
+            mode: "0755"
+
+        - name: Create k0s configuration file
+          blockinfile:
+            path: /etc/k0s/k0s.yaml
+            create: yes
+            block: |
+              apiVersion: k0s.k0sproject.io/v1beta1
+              kind: ClusterConfig
+              metadata:
+                name: k0s
+                namespace: kube-system
+              spec:
+                telemetry:
+                  enabled: false
+                storage:
+                  type: etcd
+                network:
+                  provider: calico
+                  dualStack:
+                    enabled: false
+                  calico:
+                    mode: vxlan
+                    mtu: 1480
+                    overlay: Always
+                    ipAutodetectionMethod: can-reach=8.8.8.8
+                    envVars:
+                      FELIX_IGNORELOOSERPF: "true"
+                      FELIX_ALLOWVXLANPACKETSFROMWORKLOADS: "true"
+                featureGates:
+                  - name: ImageVolume
+                    enabled: true
+                workerProfiles:
+                  - name: numa
+                    values:
+                      topologyManagerPolicy: "best-effort"
+                      cpuManagerPolicy: "static"
+                      cpuManagerPolicyOptions:
+                        full-pcpus-only: "true"
+                        distribute-cpus-across-numa: "true"
+                      reservedSystemCPUs: "0"
+                      reservedMemory:
+                        - limits:
+                            memory: 2Gi
+                          numaNode: 0
+                      kubeReservedCgroup: ""
+            marker: ""
+            mode: "0644"
+
+        - name: Create systemd override directory for k0scontroller
+          file:
+            path: /etc/systemd/system/k0scontroller.service.d
+            state: directory
+            mode: "0755"
+          when: WORKER_DATA is not defined or WORKER_DATA | trim | length == 0
+
+        - name: Create systemd override directory for k0sworker
+          file:
+            path: /etc/systemd/system/k0sworker.service.d
+            state: directory
+            mode: "0755"
+          when: WORKER_DATA is defined and WORKER_DATA | trim | length > 0
+
+        - name: Configure k0scontroller service override
+          copy:
+            dest: /etc/systemd/system/k0scontroller.service.d/override.conf
+            content: |
+              [Service]
+              LimitNOFILE=1048576
+              OOMScoreAdjust=-999
+            mode: "0644"
+          when: WORKER_DATA is not defined or WORKER_DATA | trim | length == 0
+
+        - name: Configure k0sworker service override
+          copy:
+            dest: /etc/systemd/system/k0sworker.service.d/override.conf
+            content: |
+              [Service]
+              LimitNOFILE=1048576
+              OOMScoreAdjust=-999
+            mode: "0644"
+          when: WORKER_DATA is defined and WORKER_DATA | trim | length > 0
+
+        - name: Install k0s as a Controller
+          shell: |
+            if [ ! -f /etc/systemd/system/k0scontroller.service ]; then
+              k0s install controller -c /etc/k0s/k0s.yaml {{ K0S_EXTRA_FLAGS }} --enable-worker --no-taints --profile numa --kubelet-root-dir=/var/lib/kubelet --verbose
+            fi
+          args:
+            executable: /bin/bash
+          when: WORKER_DATA is not defined or WORKER_DATA | trim | length == 0
+
+        - name: Create Worker token file
+          copy:
+            content: "{{ WORKER_DATA }}"
+            dest: /etc/k0s/token
+            mode: "0600"
+          when: WORKER_DATA is defined and WORKER_DATA | trim | length > 0
+
+        - name: Install k0s as a Worker with token
+          shell: |
+            if [ ! -f /etc/systemd/system/k0sworker.service ]; then
+              k0s install worker --token-file=/etc/k0s/token --kubelet-root-dir=/var/lib/kubelet --verbose
+            fi
+          args:
+            executable: /bin/bash
+          when: WORKER_DATA is defined and WORKER_DATA | trim | length > 0
+
+        - name: Start k0s Controller service
+          systemd:
+            name: k0scontroller.service
+            state: started
+            enabled: yes
+          when: WORKER_DATA is not defined or WORKER_DATA | trim | length == 0
+
+        - name: Start k0s Worker service
+          systemd:
+            name: k0sworker.service
+            state: started
+            enabled: yes
+          when: WORKER_DATA is defined and WORKER_DATA | trim | length > 0
+
+    - name: Install kubectl
+      block:
+        - name: Create directory for scripts
+          file:
+            path: /root/.kube
+            state: directory
+            mode: "0755"
+            owner: root
+            group: root
+
+        - name: Generate kubeconfig
+          ansible.builtin.shell: k0s kubeconfig admin > /root/.kube/config
+          args:
+            creates: /root/.kube/config
+
+        - name: Install kubectl latest stable
+          ansible.builtin.shell: |
+            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+            install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+            rm -f kubectl
+          args:
+            creates: /usr/local/bin/kubectl
+          become: true
+          changed_when: false

@@ -11,6 +11,13 @@
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
   tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - sshpass
+        state: present
+      become: true
+
     - name: Add a new host to inventory
       add_host:
         name: "{{ item.0.name }}"

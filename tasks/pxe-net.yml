@@ -7,8 +7,6 @@
     update_cache: false
 
 - name: Create PXE bridge configuration with Netplan
-  notify:
-    - Apply netplan
   ansible.builtin.copy:
     dest: /etc/netplan/10-br-pxe.yaml
     owner: root
@@ -30,8 +28,6 @@
             # No interfaces: [] needed — omitting it creates an empty bridge (ports: none)
 
 - name: Create MGMT bridge configuration with Netplan
-  notify:
-    - Apply netplan
   ansible.builtin.copy:
     dest: /etc/netplan/10-br-mgmt.yaml
     owner: root
@@ -54,8 +50,6 @@
               max-age: 20
 
 - name: Create EXT bridge configuration with Netplan
-  notify:
-    - Apply netplan
   ansible.builtin.copy:
     dest: /etc/netplan/10-br-ext.yaml
     owner: root
@@ -75,6 +69,10 @@
               forward-delay: 0
               hello-time: 2
               max-age: 20
+
+- name: Apply netplan configuration
+  ansible.builtin.command: netplan apply
+  become: true
 
 - name: Set bridge interface up
   ansible.builtin.command: ip link set {{ item }} up
