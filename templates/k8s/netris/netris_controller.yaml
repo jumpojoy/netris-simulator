@@ -1,0 +1,18 @@
+ingress:
+  ingressClassName: nginx
+  hosts:
+    - netris.k0rdent-bm-lab.miralabs.dev
+netris:
+  webLogin: netris
+  webPassword: password
+
+web-service-frontend:
+  service:
+    type: LoadBalancer 
+    annotations:
+      metallb.io/loadBalancerIPs: 10.172.1.100
+haproxy:
+  service:
+    annotations:
+      metallb.io/loadBalancerIPs: 10.172.1.101
+

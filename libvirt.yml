@@ -75,6 +75,7 @@
               - python3-libvirt
               - python3-pip
               - python3-venv
+              - python3-lxml
               # SSL certificate generation
               - openssl
             state: present
@@ -111,14 +112,38 @@
               group = "root"
               dynamic_ownership = 0
           when: ansible_distribution == "Debian"
+
+        - name: Destroy images libvirt pool
+          community.libvirt.virt_pool:
+            name: images
+            command: destroy
+            state: undefined
+
+        - name: Create and activate default libvirt storage pool
+          community.libvirt.virt_pool:
+            name: default
+            command: define
+            state: present
+            autostart: yes
+            xml: |
+              <pool type='dir'>
+                <name>default</name>
+                <target>
+                  <path>/var/lib/libvirt/images</path>
+                </target>
+              </pool>
+
+        - name: Activate and activate default libvirt storage pool
+          community.libvirt.virt_pool:
+            name: default
+            command: start
+            state: present
+            autostart: yes
+
       notify: Restart libvirtd
 
     - name: Install and configure Sushy Tools Redfish Emulator
       block:
-        - name: Generate random password for Redfish authentication
-          ansible.builtin.set_fact:
-            redfish_password: "{{ lookup('ansible.builtin.password', '/dev/null', chars=['ascii_letters', 'digits'], length=16) }}"
-
         - name: Create Sushy Tools directory structure
           file:
             path: "{{ item }}"

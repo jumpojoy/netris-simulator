@@ -32,6 +32,8 @@
         switch_type: "{{ 'spine' if item.0.name.startswith('spine') else 'leaf' }}"
         switch_id: "{{ idx }}"
         ansible_become_password: "{{ cumulus_new_password }}"
+        netris_token: "{{ netris_token }}"
+        netris_controller_ip: "{{ netris_controller_ip }}"
 
       loop: "{{ all_switches | zip(range(all_switches | length)) | list }}"
       loop_control:

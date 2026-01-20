@@ -307,5 +307,11 @@
             rm -f kubectl
           args:
             creates: /usr/local/bin/kubectl
-          become: true
+          changed_when: false
+
+        - name: Install latest Helm via official one-liner script
+          ansible.builtin.shell: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          args:
+            executable: /bin/bash
+            creates: /usr/local/bin/helm
           changed_when: false

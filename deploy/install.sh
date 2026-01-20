@@ -16,13 +16,20 @@ fi
 
 CUMULUS_NEW_PASSWORD=$(date +%s | sha256sum | base64 | head -c 15)
 NETRIS_ADMIN_PASSWORD=$(date +%s | sha256sum | base64 | head -c 15)
+REDFISH_PASSWORD=$(date +%s | sha256sum | base64 | head -c 15)
+CTL_PUBLIC_IP=$(ip route get 4.2.2.1 | awk '{print $7}' |tr -d "\n")
 
 sed -i "s/<CUMULUS_NEW_PASSWORD>/${CUMULUS_NEW_PASSWORD}/g" ${NETRIS_SIMULATOR_DIR}/inventory.yml
 sed -i "s/<NETRIS_ADMIN_PASSWORD>/${NETRIS_ADMIN_PASSWORD}/g" ${NETRIS_SIMULATOR_DIR}/inventory.yml
+sed -i "s/<REDFISH_PASSWORD>/${REDFISH_PASSWORD}/g" ${NETRIS_SIMULATOR_DIR}/inventory.yml
+sed -i "s/<CTL_PUBLIC_IP>/${CTL_PUBLIC_IP}/g" ${NETRIS_SIMULATOR_DIR}/inventory.yml
 
 
-ansible-playbook -i ${NETRIS_SIMULATOR_DIR}/inventory.yml ${NETRIS_SIMULATOR_DIR}/k0s.yml
-ansible-playbook -i ${NETRIS_SIMULATOR_DIR}/inventory.yml ${NETRIS_SIMULATOR_DIR}/configure-sushyemulator.yml
-
-
-ansible-playbook -i ${NETRIS_SIMULATOR_DIR}/inventory.yml ${NETRIS_SIMULATOR_DIR}/create-vms.yml
+# ansible-playbook -i ${NETRIS_SIMULATOR_DIR}/inventory.yml ${NETRIS_SIMULATOR_DIR}/k0s.yml 
+# ansible-playbook -i ${NETRIS_SIMULATOR_DIR}/inventory.yml ${NETRIS_SIMULATOR_DIR}/libvirt.yml 
+# ansible-playbook -i ${NETRIS_SIMULATOR_DIR}/inventory.yml ${NETRIS_SIMULATOR_DIR}/ipa.yml 
+# ansible-playbook -i ${NETRIS_SIMULATOR_DIR}/inventory.yml ${NETRIS_SIMULATOR_DIR}/lvp.yml 
+# ansible-playbook -i ${NETRIS_SIMULATOR_DIR}/inventory.yml ${NETRIS_SIMULATOR_DIR}/metallb.yml 
+# ansible-playbook -i ${NETRIS_SIMULATOR_DIR}/inventory.yml ${NETRIS_SIMULATOR_DIR}/netris-controller.yml 
+# ansible-playbook -i ${NETRIS_SIMULATOR_DIR}/inventory.yml ${NETRIS_SIMULATOR_DIR}/netris-operator.yml 
+# ansible-playbook -i ${NETRIS_SIMULATOR_DIR}/inventory.yml ${NETRIS_SIMULATOR_DIR}/ufo.yml 

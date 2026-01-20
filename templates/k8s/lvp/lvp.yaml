@@ -8,7 +8,8 @@ classes:
   hostDir: /mnt/local-volume-provisioner
   mountDir: /mnt/local-volume-provisioner
   volumeMode: Filesystem
-  storageClass: true
+  storageClass:
+    isDefaultClass: true
   bindMounts:
   - srcRoot: /var/lib/local-volume-provisioner
     mounts:

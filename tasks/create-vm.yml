@@ -71,8 +71,6 @@
   vars:
     server_name: "{{ vm_name }}"
     pxe_mac: "{{vm_base_mac }}:{{ '%02x' | format(vm_base_offset | int // 256) }}:{{ '%02x' | format(vm_base_offset | int % 256) }}"
-    redfish_password: "I80gRaWHD2aHEyZ4"
-    redfish_username: "{{ vbmc_user }}"
     server_uuid: '{{ vm_uuid.stdout | regex_replace("\s","") }}'
   ansible.builtin.template:
     src: "k8s/metal3_bmh.j2"

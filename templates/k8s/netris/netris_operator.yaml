@@ -1,5 +1,5 @@
 controller:
-  host: http://172.19.115.211:81
+  host: http://172.19.121.211:81
   login: netris
   password: password
 image:

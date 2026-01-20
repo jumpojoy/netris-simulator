@@ -103,9 +103,9 @@ cumulus_user: cumulus
 cumulus_default_password: cumulus
 cumulus_new_password: password
 
-vbmc_user: admin
-vbmc_password: password
-vbmc_base_port: 6230
+redfish_username: admin
+redfish_password: password
+
 vm_base_mac: "52:54:00:12"
 bridge_name: br-mgmt
 vm_vcpus: 6
@@ -121,7 +121,7 @@ sg_image: "/var/lib/libvirt/images/noble-server-cloudimg-amd64.img"
 sg_disk_size: 60
 
 netris_token: <token from webapi>
-netris_controller: 10.172.1.100
+netris_controller_ip: 10.172.1.100
 
 loopback_base: "192.169"
 management_base: "192.168"
@@ -159,3 +159,7 @@ br_mgmt_netmask: 24
 
 br_ext_name: br-ext
 br_ext_netmask: 24
+
+
+ufo_debug: true
+

@@ -75,3 +75,23 @@ ssh -p 2201 cumulus@127.0.0.1 "nv show service lldp neighbor"
 # Check BGP status
 ssh -p 2201 cumulus@127.0.0.1 "nv show router bgp neighbor"
 ```
+
+## Deploy All in one appliance
+
+
+### Create heat stack AIO
+```
+cd deploy/heat
+openstack stack create -t top.yaml -e env/k0s-aio.yaml ufo-aio-01
+openstack stack output show ufo-aio-01 --all
+```
+
+### Install simulation
+
+```
+cd /opt/ufo_lab/netris-simulator
+bash deploy/install.sh
+```
+
+### Run playbooks
+Check install.sh and run playbooks sequentially
