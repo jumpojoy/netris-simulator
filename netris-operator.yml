@@ -22,10 +22,19 @@
         dest: "{{ netris_operator_dir }}"
         version: "{{ netris_operator_branch }}"
 
-    - name: Make lvp chart dependencies
+    - name: Make chart dependencies
       ansible.builtin.shell:
         cmd: helm dep up
         chdir: "{{ netris_operator_dir }}/deploy/charts/netris-operator/"
+
+    - name: Handle templates
+      block:
+        - name: Render templates
+          ansible.builtin.template:
+            src: "k8s/netris/{{ item }}"
+            dest: "{{ k8s_artifacts_dir }}/netris/{{ item }}"
+          with_items:
+           - "netris_operator.yaml"
 
     - name: Deploy/upgrade netris controller helm release
       kubernetes.core.helm:
@@ -34,7 +43,7 @@
         release_namespace: netris-operator
         create_namespace: true
         values_files:
-          - "{{ workspace }}/netris-simulator/templates/k8s/netris/netris_operator.yaml"
+          - "{{ /k8s_artifacts_dir }}/netris_operator.yaml"
         state: present
         wait: true
         wait_timeout: 300s
