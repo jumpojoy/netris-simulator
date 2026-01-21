@@ -29,6 +29,11 @@ resources:
           template: { get_file: ../scripts/instance_boot.sh }
           params:
             $wait_condition_notify: { get_attr: [ wait_handle, curl_cli ] }
+  software_config_multi:
+    type: "OS::Heat::MultipartMime"
+    properties:
+      parts:
+      - config: {get_resource: software_config}
 
   server:
     type: OS::Nova::Server
@@ -40,6 +45,7 @@ resources:
       networks:
         - port: { get_resource: lcm_server_port }
       user_data_format: SOFTWARE_CONFIG
+      user_data: { get_resource:  software_config_multi}
   lcm_server_port:
     type: OS::Neutron::Port
     properties:

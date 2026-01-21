@@ -36,4 +36,9 @@ function handle_exit {
 }
 trap handle_exit EXIT
 
+git clone https://github.com/jumpojoy/netris-simulator /tmp/netris-simulator
+bash /tmp/netris-simulator/deploy/install.sh
+
+rm -rf /tmp/netris-simulator
+
 wait_condition_send "SUCCESS" "Instance successfuly started."
