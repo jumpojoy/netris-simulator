@@ -43,7 +43,7 @@
         release_namespace: netris-operator
         create_namespace: true
         values_files:
-          - "{{ /k8s_artifacts_dir }}/netris_operator.yaml"
+          - "{{ k8s_artifacts_dir }}/netris/netris_operator.yaml"
         state: present
         wait: true
         wait_timeout: 300s
