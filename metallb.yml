@@ -25,7 +25,9 @@
 
     - name: Make chart dependencies
       ansible.builtin.shell:
-        cmd: helm dep up --skip-refresh
+        cmd: |
+          helm dep up
+          rm -rf .cache
         chdir: "{{ metallb_dir }}/charts/metallb/"
 
     - name: Ensure target directory

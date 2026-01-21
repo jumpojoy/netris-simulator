@@ -24,7 +24,9 @@
 
     - name: Make chart dependencies
       ansible.builtin.shell:
-        cmd: helm dep up --skip-refresh
+        cmd: |
+          helm dep up
+          rm -rf .cache
         chdir: "{{ netris_operator_dir }}/deploy/charts/netris-operator/"
 
     - name: Handle templates
