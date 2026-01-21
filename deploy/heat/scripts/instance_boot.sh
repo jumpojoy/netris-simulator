@@ -5,6 +5,8 @@ set -ex
 [[ -z "$_INSTALL_SCRIPT" ]] || return 0
 declare -r -g _INSTALL_SCRIPT=1
 
+echo $(id)
+
 function wait_condition_send {
     local status=${1:-SUCCESS}
     local reason=${2:-\"empty\"}

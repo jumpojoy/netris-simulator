@@ -29,6 +29,7 @@
     - name: Deploy/upgrade lvp release
       kubernetes.core.helm:
         name: lvp
+        kubeconfig: "{{ kubeconfig_path }}"
         chart_ref: "{{ lvp_chart_url }}"
         release_namespace: lvp
         create_namespace: true

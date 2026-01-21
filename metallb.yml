@@ -46,6 +46,7 @@
     - name: Deploy/upgrade netris controller helm release
       kubernetes.core.helm:
         name: metallb
+        kubeconfig: "{{ kubeconfig_path }}"
         chart_ref: "{{ metallb_dir }}/charts/metallb/"
         release_namespace: metallb-system
         create_namespace: true

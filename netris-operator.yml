@@ -39,6 +39,7 @@
     - name: Deploy/upgrade netris controller helm release
       kubernetes.core.helm:
         name: netris-operator
+        kubeconfig: "{{ kubeconfig_path }}"
         chart_ref: "{{ netris_operator_dir }}/deploy/charts/netris-operator/"
         release_namespace: netris-operator
         create_namespace: true

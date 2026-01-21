@@ -282,7 +282,7 @@
             group: root
 
         - name: Generate kubeconfig
-          ansible.builtin.shell: k0s kubeconfig admin > /root/.kube/config
+          ansible.builtin.shell: k0s kubeconfig admin > "{{ kubeconfig_path }}"
           args:
             creates: /root/.kube/config
 
