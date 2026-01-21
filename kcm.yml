@@ -48,7 +48,7 @@
           
         - name: Apply Management object
           ansible.builtin.command:
-            cmd: kubectl apply -f "{{ k8s_artifacts_dir }}/kcm/{{ item }}"
+            cmd: kubectl --kubeconfig {{ kubeconfig_path }} apply -f "{{ k8s_artifacts_dir }}/kcm/{{ item }}"
           with_items:
            - "management.yml"
            - "metal3-provider.yml"

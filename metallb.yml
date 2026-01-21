@@ -58,6 +58,6 @@
 
     - name: Apply Address pools
       ansible.builtin.command:
-        cmd: kubectl apply -f {{ item }}
+        cmd: kubectl --kubeconfig {{ kubeconfig_path }} apply -f {{ item }}
       with_items:
       - "{{ k8s_artifacts_dir }}/metallb/metallb-address-pool.yaml"

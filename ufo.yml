@@ -41,7 +41,7 @@
 
         - name: Install CRDs
           ansible.builtin.shell: |
-            kubectl apply -k {{ ufo_repo_dir }}/config/crd/
+            kubectl --kubeconfig {{ kubeconfig_path }} apply -k {{ ufo_repo_dir }}/config/crd/
 
     - name: Print info
       vars:
