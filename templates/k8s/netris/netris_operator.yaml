@@ -1,3 +1,4 @@
+registry: dockerproxy.artifactory-eu.mcp.mirantis.net/
 controller:
   host: "{{ netris_web_api_url }}"
   login: "{{ netris_admin_username }}"
