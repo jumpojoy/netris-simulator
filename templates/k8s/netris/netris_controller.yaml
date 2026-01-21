@@ -3,8 +3,8 @@ ingress:
   hosts:
     - netris.k0rdent-bm-lab.miralabs.dev
 netris:
-  webLogin: netris
-  webPassword: password
+  webLogin: "{{ netris_admin_username }}"
+  webPassword: "{{ netris_admin_password }}"
 
 web-service-frontend:
   service:
