@@ -5,6 +5,7 @@ NETRIS_ARTIFACTS_DIR=${NETRIS_SIMULATOR_DIR}/artifacts
 NETRIS_K8S_ARTIFACTS_DIR=${NETRIS_ARTIFACTS_DIR}/k8s
 export DEBIAN_FRONTEND=noninteractive
 export PIP_BREAK_SYSTEM_PACKAGES=1
+export KUBECONFIG=/root/.kube/config
 
 apt update && apt install -y python3-pip
 
