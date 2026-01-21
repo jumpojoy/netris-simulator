@@ -20,7 +20,7 @@
   gather_facts: true
   ignore_errors: false
   vars:
-    K0S_MAJOR_MINOR_VERSION: "1.33"
+    k0s_version: "v1.33.1+k0s.0"
     K0S_EXTRA_FLAGS: "--enable-dynamic-config --disable-components=konnectivity-server"
     WORKER_DATA: ""
 
@@ -139,25 +139,11 @@
     - name: Install k0s
       when: not k0s_config_stat.stat.exists
       block:
-        - name: Get latest k0s {{ K0S_MAJOR_MINOR_VERSION }} version
-          shell: |
-            curl -s "https://api.github.com/repos/k0sproject/k0s/releases" | \
-            jq -r '.[] | select(.tag_name | test("^v{{ K0S_MAJOR_MINOR_VERSION | replace(".", "\\.") }}\\.[0-9]+\\+k0s\\.[0-9]+$")) | .tag_name' | \
-            head -1
-          register: k0s_version_result
-          changed_when: false
-
-        - name: Set k0s version
-          set_fact:
-            k0s_version: "{{ k0s_version_result.stdout }}"
-          when: k0s_version_result.stdout | length > 0
-
         - name: Download k0s binary ({{ k0s_version | default('version not found') }})
           get_url:
             url: "https://github.com/k0sproject/k0s/releases/download/{{ k0s_version }}/k0s-{{ k0s_version }}-amd64"
             dest: /usr/local/bin/k0s
             mode: "0755"
-          when: k0s_version is defined
 
         - name: Create k0s config directory
           file:
