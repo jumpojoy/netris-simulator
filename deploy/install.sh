@@ -2,6 +2,7 @@ WORKDIR=/opt/ufo_lab/
 
 NETRIS_SIMULATOR_DIR=${WORKDIR}/netris-simulator
 NETRIS_ARTIFACTS_DIR=${NETRIS_SIMULATOR_DIR}/artifacts
+NETRIS_K8S_ARTIFACTS_DIR=${NETRIS_SIMULATOR_DIR}/k8s
 export DEBIAN_FRONTEND=noninteractive
 export PIP_BREAK_SYSTEM_PACKAGES=1
 
@@ -50,18 +51,18 @@ ansible-playbook -i ${NETRIS_SIMULATOR_DIR}/inventory.yml ${NETRIS_SIMULATOR_DIR
 
 
 # Register resources
-kubectl apply -f ${NETRIS_ARTIFACTS_DIR}/static/pxe-net.yaml
-kubectl apply -f ${NETRIS_ARTIFACTS_DIR}/static/site-default.yaml
-kubectl apply -f ${NETRIS_ARTIFACTS_DIR}/static/subnetpool-default.yaml
-kubectl apply -f ${NETRIS_ARTIFACTS_DIR}/ctl.yaml
-kubectl apply -f ${NETRIS_ARTIFACTS_DIR}/leaf-0.yaml
-kubectl apply -f ${NETRIS_ARTIFACTS_DIR}/leaf-1.yaml
-kubectl apply -f ${NETRIS_ARTIFACTS_DIR}/netris_ipam.yaml
-kubectl apply -f ${NETRIS_ARTIFACTS_DIR}/spine-0.yaml
-kubectl apply -f ${NETRIS_ARTIFACTS_DIR}/spine-1.yaml
-kubectl apply -f ${NETRIS_ARTIFACTS_DIR}/vm-0.yaml
-kubectl apply -f ${NETRIS_ARTIFACTS_DIR}/vm-1.yaml
-kubectl apply -f ${NETRIS_ARTIFACTS_DIR}/vm-2.yaml
-kubectl apply -f ${NETRIS_ARTIFACTS_DIR}/vm-0_bmh.yaml
-kubectl apply -f ${NETRIS_ARTIFACTS_DIR}/vm-1_bmh.yaml
-kubectl apply -f ${NETRIS_ARTIFACTS_DIR}/vm-2_bmh.yaml
+kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/static/pxe-net.yaml
+kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/static/site-default.yaml
+kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/static/subnetpool-default.yaml
+kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/ctl.yaml
+kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/leaf-0.yaml
+kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/leaf-1.yaml
+kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/netris_ipam.yaml
+kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/spine-0.yaml
+kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/spine-1.yaml
+kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/vm-0.yaml
+kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/vm-1.yaml
+kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/vm-2.yaml
+kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/vm-0_bmh.yaml
+kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/vm-1_bmh.yaml
+kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/vm-2_bmh.yaml
