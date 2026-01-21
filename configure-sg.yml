@@ -45,5 +45,8 @@
     all_softgates: "{{ topology.softgates }}"
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
   tasks:
+    - name: Set netris_auth_token
+      ansible.builtin.include_tasks: tasks/netris_get_auth_token.yml
+
     - name: Configure each SoftGateway
       include_tasks: tasks/configure-sg.yml

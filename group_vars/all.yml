@@ -120,8 +120,10 @@ sg_image_url: "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudi
 sg_image: "/var/lib/libvirt/images/noble-server-cloudimg-amd64.img"
 sg_disk_size: 60
 
-netris_token: <token from webapi>
-netris_controller_ip: 10.172.1.100
+netris_auth_token: <token from webapi>
+netris_admin_username: netris
+netris_admin_password: password
+
 
 loopback_base: "192.169"
 management_base: "192.168"
@@ -162,5 +164,6 @@ br_ext_netmask: 24
 
 
 ufo_debug: true
-netris_controller_ip: 10.172.1.101
-netris_web_frontend_ip: 10.172.1.100
+netris_controller_ip: 10.172.1.100
+netris_web_frontend_ip: 10.172.1.101
+netris_web_api_url: "http://{{ netris_web_frontend_ip }}"

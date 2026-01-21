@@ -32,7 +32,7 @@
         switch_type: "{{ 'spine' if item.0.name.startswith('spine') else 'leaf' }}"
         switch_id: "{{ idx }}"
         ansible_become_password: "{{ cumulus_new_password }}"
-        netris_token: "{{ netris_token }}"
+        netris_auth_token: "{{ netris_auth_token }}"
         netris_controller_ip: "{{ netris_controller_ip }}"
 
       loop: "{{ all_switches | zip(range(all_switches | length)) | list }}"
@@ -72,6 +72,9 @@
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
   tasks:
+    - name: Set netris_auth_token
+      ansible.builtin.include_tasks: tasks/netris_get_auth_token.yml
+
     - name: Configure each switch
       include_tasks: tasks/configure-switch.yml
 
