@@ -25,7 +25,7 @@
 
     - name: Make chart dependencies
       ansible.builtin.shell:
-        cmd: helm dep up
+        cmd: helm dep up --skip-refresh
         chdir: "{{ netris_chars_dir }}/charts/netris-controller/"
 
     - name: Ensure target directory
