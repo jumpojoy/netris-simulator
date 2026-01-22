@@ -1,7 +1,7 @@
 apiVersion: k8s.netris.ai/v1alpha1
 kind: Site
 metadata:
-  name: defaultt
+  name: default
 spec:
   publicAsn: 65513
   rohAsn: 0
