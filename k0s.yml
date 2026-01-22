@@ -143,7 +143,7 @@
             path: /etc/k0s/
             state: directory
             mode: "0755"
-         - name: Create containerd config file
+        - name: Create containerd config file
           blockinfile:
             path: /etc/k0s/containerd.toml
             create: yes
@@ -278,10 +278,12 @@
                     [plugins."io.containerd.grpc.v1.cri".registry.headers]
               
                     [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+                    {% if docker_image_proxy %}
                       [plugins."io.containerd.cri.v1.images".registry.mirrors."docker.io"]
-                        endpoint = ["https://dockerproxy.artifactory-eu.mcp.mirantis.net"]
+                        endpoint = ["{{ docker_image_proxy }}"]
                       [plugins."io.containerd.cri.v1.images".registry.mirrors."gcr.io"]
-                        endpoint = ["https://dockerproxy.artifactory-eu.mcp.mirantis.net"]
+                        endpoint = ["{{ docker_image_proxy }}"]
+                    {% endif %}
               
                   [plugins."io.containerd.grpc.v1.cri".x509_key_pair_streaming]
                     tls_cert_file = ""

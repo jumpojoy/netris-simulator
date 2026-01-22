@@ -172,3 +172,5 @@ netris_web_frontend_ip: 10.172.1.101
 netris_web_api_url: "http://{{ netris_web_frontend_ip }}"
 
 kubeconfig_path: "/root/.kube/config"
+
+docker_image_proxy: https://dockerproxy.artifactory-eu.mcp.mirantis.net
