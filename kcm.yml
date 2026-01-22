@@ -52,3 +52,8 @@
           with_items:
            - "management.yml"
            - "metal3-provider.yml"
+
+    - name: Wait kcm management cluster ready
+      ansible.builtin.command:
+        cmd: kubectl --kubeconfig {{ kubeconfig_path }} wait --for=condition=Ready=True management/kcm --timeout=900s
+      timeout: 900
