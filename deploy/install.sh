@@ -57,8 +57,8 @@ kubectl wait --for=condition=Ready=True management/kcm --timeout=1800s
 kubectl wait --for=condition=ready pod --all --all-namespaces --timeout=1800m
 
 # Register resources
-kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/static/pxe-net.yaml
 kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/static/site-default.yaml
+kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/static/pxe-net.yaml
 kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/static/subnetpool-default.yaml
 kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/ctl.yaml
 kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/leaf-0.yaml
