@@ -4,4 +4,4 @@ controller:
   password: "{{ netris_admin_password }}"
 image:
   repository: jumpojoy/netris-operator
-  tag: vs84
+  tag: vs90
