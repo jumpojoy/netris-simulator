@@ -65,6 +65,21 @@
       loop_control:
         label: "{{ item.0.name }}"
 
+- name: Install netris license
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Install license
+      ansible.builtin.uri:
+       url:         "{{ netris_web_api_url }}/api/v2/general"
+       method:      PUT
+       validate_certs: false
+       headers:
+         Cookie:    "{{ netris_login_cookie }}"
+       body:
+         key: "{{ netris_license_key }}"
+      when: netris_license_key
+
 - name: Configure Cumulus Switches
   hosts: all_switches
   gather_facts: no
