@@ -1,4 +1,3 @@
-registry: dockerproxy.artifactory-eu.mcp.mirantis.net/
 ingress:
   ingressClassName: nginx
   hosts:

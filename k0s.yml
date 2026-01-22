@@ -280,9 +280,9 @@
                     [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
                     {% if docker_image_proxy %}
 
-                      [plugins."io.containerd.cri.v1.images".registry.mirrors."docker.io"]
+                      [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
                         endpoint = ["{{ docker_image_proxy }}"]
-                      [plugins."io.containerd.cri.v1.images".registry.mirrors."gcr.io"]
+                      [plugins."io.containerd.grpc.v1.cri".registry.mirrors."gcr.io"]
                         endpoint = ["{{ docker_image_proxy }}"]
                     {% endif %}
               
