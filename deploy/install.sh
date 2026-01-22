@@ -50,6 +50,8 @@ ansible-playbook -i ${NETRIS_SIMULATOR_DIR}/inventory.yml ${NETRIS_SIMULATOR_DIR
 ansible-playbook -i ${NETRIS_SIMULATOR_DIR}/inventory.yml ${NETRIS_SIMULATOR_DIR}/create-switches.yml
 ansible-playbook -i ${NETRIS_SIMULATOR_DIR}/inventory.yml ${NETRIS_SIMULATOR_DIR}/configure-switches.yml
 
+# Wait everything is ready before moving forwad
+kubectl wait --for=condition=ready pod --all --all-namespaces --timeout=3600m
 
 # Register resources
 kubectl apply -f ${NETRIS_K8S_ARTIFACTS_DIR}/static/pxe-net.yaml
