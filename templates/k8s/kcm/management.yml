@@ -54,13 +54,13 @@ spec:
           - console=ttyS1,115200n8
           - console=tty1{% endraw %}
 
-        images_ipa:
-          - checksum: 5bdaf83d4c82e68d4780be75581b21a02c6cde73c278cd586b52e55ce9016800
-            name: ironic-python-agent.x86_64.initramfs
-            url: http://{{ ctl_public_ip }}/artifacts/ipa/ipa-amd64.initramfs
-          - checksum: 560468155601807c27080040518c6ccbc3bd932bb3df917d7829d5d848488861
-            name: ironic-python-agent.x86_64.kernel
-            url: http://{{ ctl_public_ip }}/artifacts/ipa/ipa-amd64.kernel
+#        images_ipa:
+#          - checksum: 5bdaf83d4c82e68d4780be75581b21a02c6cde73c278cd586b52e55ce9016800
+#            name: ironic-python-agent.x86_64.initramfs
+#            url: http://{{ ctl_public_ip }}/artifacts/ipa/ipa-amd64.initramfs
+#          - checksum: 560468155601807c27080040518c6ccbc3bd932bb3df917d7829d5d848488861
+#            name: ironic-python-agent.x86_64.kernel
+#            url: http://{{ ctl_public_ip }}/artifacts/ipa/ipa-amd64.kernel
         images_target:
         - checksum: 85743244cc8f2f47384480c81dbb677585d20ed693127667dbfb116f1682f793
           name: ubuntu-noble-server-cloudimg-amd64-20251026.qcow2
@@ -70,10 +70,10 @@ spec:
           url: https://cloud-images.ubuntu.com/noble/20251026/noble-server-cloudimg-arm64.img
         ironic:
           env:
-            DEPLOY_KERNEL_BY_ARCH: x86_64:file:///shared/html/images/ironic-python-agent.x86_64.kernel,aarch64:file:///shared/html/images/ironic-python-agent.arm64.kernel
-            DEPLOY_KERNEL_URL: "file:///shared/html/images/ironic-python-agent.x86_64.kernel"
-            DEPLOY_RAMDISK_BY_ARCH: x86_64:file:///shared/html/images/ironic-python-agent.x86_64.initramfs,aarch64:file:///shared/html/images/ironic-python-agent.arm64.initramfs
-            DEPLOY_RAMDISK_URL: "file:///shared/html/images/ironic-python-agent.x86_64.initramfs"
+#            DEPLOY_KERNEL_BY_ARCH: x86_64:file:///shared/html/images/ironic-python-agent.x86_64.kernel,aarch64:file:///shared/html/images/ironic-python-agent.arm64.kernel
+#            DEPLOY_KERNEL_URL: "file:///shared/html/images/ironic-python-agent.x86_64.kernel"
+#            DEPLOY_RAMDISK_BY_ARCH: x86_64:file:///shared/html/images/ironic-python-agent.x86_64.initramfs,aarch64:file:///shared/html/images/ironic-python-agent.arm64.initramfs
+#            DEPLOY_RAMDISK_URL: "file:///shared/html/images/ironic-python-agent.x86_64.initramfs"
             HTTPD_SERVE_NODE_IMAGES: "true"
             IRONIC_EXTERNAL_HTTP_URL: http://{{ br_mgmt_ip }}
             IRONIC_KERNEL_PARAMS: console=ttyS0
