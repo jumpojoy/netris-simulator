@@ -6,10 +6,9 @@
   gather_facts: true
   ignore_errors: false
   vars:
-    ipa_url_base: https://s3rj1k.github.io/ironic-python-agent
     ipa_files:
-     - ipa-amd64.kernel
-     - ipa-amd64.initramfs
+     - url: https://cloud-images.ubuntu.com/noble/20260108/noble-server-cloudimg-amd64.img
+       dst: noble-server-cloudimg-amd64.img
 
   tasks:
     - name: Prepare nginx
@@ -39,8 +38,8 @@
 
         - name: Download nginx signing key
           ansible.builtin.get_url:
-            url: "{{ ipa_url_base }}/{{ item }}"
-            dest: "/var/www/html/ipa/{{ item }}"
+            url: "{{ item.url }}"
+            dest: "/var/www/html/ipa/{{ item.dst }}"
             mode: '0644'
             owner: root
             group: root
