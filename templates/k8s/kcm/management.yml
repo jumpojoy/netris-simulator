@@ -52,7 +52,9 @@ spec:
           - ipa-collect-lldp=0
           - ipa-inspection-collectors=default,logs,pci-devices,dmi-decode,numa-topology
           - console=ttyS1,115200n8
-          - console=tty1{% endraw %}
+          - console=tty1
+        {% endraw %}
+
         images_ipa:
         # Images with Infinibald client_id support
         - checksum: 0976c8cd270093a94b990823772fe66ebf2240f5d60b16acf18a5ef469073381
