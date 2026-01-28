@@ -29,7 +29,7 @@ spec:
       baremetal-operator:
         images:
           bm_operator:
-            fullName: quay.io/metal3-io/baremetal-operator:v0.12.0
+            fullName: jumpojoy/baremetal-operator:v0.12.0-infiniband-02
       config:
         ENABLE_BMH_NAME_BASED_PREALLOCATION: true
       global:
@@ -53,14 +53,14 @@ spec:
           - ipa-inspection-collectors=default,logs,pci-devices,dmi-decode,numa-topology
           - console=ttyS1,115200n8
           - console=tty1{% endraw %}
-
-#        images_ipa:
-#          - checksum: 5bdaf83d4c82e68d4780be75581b21a02c6cde73c278cd586b52e55ce9016800
-#            name: ironic-python-agent.x86_64.initramfs
-#            url: http://{{ ctl_public_ip }}/artifacts/ipa/ipa-amd64.initramfs
-#          - checksum: 560468155601807c27080040518c6ccbc3bd932bb3df917d7829d5d848488861
-#            name: ironic-python-agent.x86_64.kernel
-#            url: http://{{ ctl_public_ip }}/artifacts/ipa/ipa-amd64.kernel
+        images_ipa:
+        # Images with Infinibald client_id support
+        - checksum: 0976c8cd270093a94b990823772fe66ebf2240f5d60b16acf18a5ef469073381
+          name: ironic-python-agent_x86_64.initramfs
+          url: https://get.mirantis.com/k0rdent-enterprise/bare-metal/ipa/ipa-centos9-stream-2026-01-27-14-05-26-amd64.initramfs
+        - checksum: 0537a168cd6ff36253f5db40c4b8ed5daa541bad262f4ec8a99357ae24cb2c25
+          name: ironic-python-agent_x86_64.kernel
+          url: https://get.mirantis.com/k0rdent-enterprise/bare-metal/ipa/ipa-centos9-stream-2026-01-27-14-05-26-amd64.kernel
         images_target:
         - checksum: 85743244cc8f2f47384480c81dbb677585d20ed693127667dbfb116f1682f793
           name: ubuntu-noble-server-cloudimg-amd64-20251026.qcow2
