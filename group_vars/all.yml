@@ -165,8 +165,9 @@ br_ext_netmask: 24
 
 ufo_dev_mode: false
 ufo_chart_repo: oci://registry.ci.mirantis.com/k0rdent-bm/charts/unified-fabric-operator
-ufo_chart_version: 0.0.1-6d0bf1c
-ufo_image_tag: 0.0.1-6d0bf1c.1769101865
+ufo_chart_version: 0.0.1-8586bfe
+ufo_image_tag: 0.0.1-8586bfe.1769198335
+ufo_fabric_backend: netris
 
 netris_controller_ip: 10.172.1.100
 netris_web_frontend_ip: 10.172.1.101
