@@ -71,13 +71,14 @@
   tasks:
     - name: Install license
       ansible.builtin.uri:
-       url:         "{{ netris_web_api_url }}/api/v2/general"
-       method:      PUT
+       url:         "{{ netris_web_api_url }}/api/v2/license"
+       method: PUT
        validate_certs: false
        headers:
          Cookie:    "{{ netris_login_cookie }}"
        body:
          key: "{{ netris_license_key }}"
+       body_format: "json"
       when: netris_license_key
 
 - name: Configure Cumulus Switches

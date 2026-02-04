@@ -4,4 +4,4 @@ controller:
   password: "{{ netris_admin_password }}"
 image:
   repository: registry.ci.mirantis.com/k0rdent-bm/images/netris-operator
-  tag: 0.0.1-09dc177.1769098508
+  tag: 0.0.1-c1a3a31.
